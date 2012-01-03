@@ -240,28 +240,18 @@ class SetAction(sublime_plugin.TextCommand):
 
         return self.run(**args)
 
-    def run(self, action, action_args = {}, motion_mode = None, description = None):
+    def run(self, action, action_args = {}, description = None):
         global g_input_state
         g_input_state.action_command = action
         g_input_state.action_command_args = action_args
         g_input_state.action_description = description
-
-        if motion_mode is not None:
-            m = string_to_motion_mode(motion_mode)
-            if m != -1:
-                if g_input_state.motion_mode == MOTION_MODE_LINE and m == MOTION_MODE_AUTO_LINE:
-                    # e.g., 'Vjd', MOTION_MODE_LINE should be maintained
-                    pass
-                else:
-                    set_motion_mode(self.view, m)
-            else:
-                print "invalid motion mode:", motion_mode
 
         if self.view.has_non_empty_selection_region():
             # Currently in visual mode, so no following motion is expected:
             # eval the current input
             eval_input(self.view)
         else:
+            set_motion_mode(self.view, MOTION_MODE_AUTO_LINE)
             update_status_line(self.view)
 
 def digits_to_number(digits):

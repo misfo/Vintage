@@ -309,15 +309,13 @@
 
 	{ "keys": ["d"], "command": "set_action", "args": {
 		"action": "vi_delete",
-		"description": "Delete",
-		"motion_mode": "auto_line"},
+		"description": "Delete"},
 		"context": [{"key": "setting.command_mode"}]
 	},
 
 	{ "keys": ["y"], "command": "set_action", "args": {
 		"action": "vi_copy",
-		"description": "Yank",
-		"motion_mode": "auto_line"},
+		"description": "Yank"},
 		"context": [{"key": "setting.command_mode"}]
 	},
 
@@ -352,7 +350,7 @@
 		"context": [{"key": "setting.command_mode"}]
 	},
 
-	{ "keys": [">"], "command": "set_action", "args": {"action": "vi_indent", "description": "Indent", "motion_mode": "auto_line"},
+	{ "keys": [">"], "command": "set_action", "args": {"action": "vi_indent", "description": "Indent"},
 		"context": [{"key": "setting.command_mode"}]
 	},
 
