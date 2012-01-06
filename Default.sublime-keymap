@@ -43,6 +43,8 @@
 
 	{ "keys" : ["z", "z"], "command" : "center_on_cursor", "context": [{"key": "setting.command_mode"}] },
 
+	{ "keys": ["Z", "Z"], "command" : "vi_save_and_exit", "context": [{"key": "setting.command_mode"}] },
+
 	{ "keys": ["i"], "command": "enter_insert_mode", "context": [{"key": "setting.command_mode"}] },
 	{ "keys": ["I"], "command": "enter_insert_mode", "args":
 		{"insert_command": "vi_move_to_first_non_white_space_character"},
@@ -255,15 +257,6 @@
 		},
 		"context": [{"key": "setting.vintage_ctrl_keys"}, {"key": "setting.command_mode"}]
 	},
-	{ "keys": ["ctrl+w", "ctrl+o"], "command": "set_layout",
-		"args":
-		{
-			"cols": [0.0, 1.0],
-			"rows": [0.0, 1.0],
-			"cells": [[0, 0, 1, 1]]
-		},
-		"context": [{"key": "setting.vintage_ctrl_keys"}, {"key": "setting.command_mode"}]
-	},
 
 	{ "keys": ["ctrl+w", "s"], "command": "set_layout",
 		"args":
@@ -274,26 +267,8 @@
 		},
 		"context": [{"key": "setting.vintage_ctrl_keys"}, {"key": "setting.command_mode"}]
 	},
-	{ "keys": ["ctrl+w", "ctrl+s"], "command": "set_layout",
-		"args":
-		{
-			"cols": [0.0, 1.0],
-			"rows": [0.0, 0.5, 1.0],
-			"cells": [[0, 0, 1, 1], [0, 1, 1, 2]]
-		},
-		"context": [{"key": "setting.vintage_ctrl_keys"}, {"key": "setting.command_mode"}]
-	},
 
 	{ "keys": ["ctrl+w", "v"], "command": "set_layout",
-		"args":
-		{
-			"cols": [0.0, 0.5, 1.0],
-			"rows": [0.0, 1.0],
-			"cells": [[0, 0, 1, 1], [1, 0, 2, 1]]
-		},
-		"context": [{"key": "setting.vintage_ctrl_keys"}, {"key": "setting.command_mode"}]
-	},
-	{ "keys": ["ctrl+w", "ctrl+v"], "command": "set_layout",
 		"args":
 		{
 			"cols": [0.0, 0.5, 1.0],
@@ -695,6 +670,7 @@
 
 	{ "keys": [">"], "command": "set_motion", "args": {
 		"motion": "expand_selection",
+		"motion_args": {"to": "line" },
 		"mode": "normal"},
 		"context":
 		[
@@ -705,6 +681,7 @@
 
 	{ "keys": ["<"], "command": "set_motion", "args": {
 		"motion": "expand_selection",
+		"motion_args": {"to": "line" },
 		"mode": "normal"},
 		"context":
 		[
