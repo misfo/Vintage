@@ -111,6 +111,13 @@
 			{"key": "vi_motion_mode", "operand": "line"}
 		]
 	},
+	{ "keys": ["V"], "command": "set_motion_mode", "args": {"mode": "line"},
+		"context":
+		[
+			{"key": "setting.command_mode"},
+			{"key": "vi_has_action" }
+		]
+	},
 
 	{ "keys": ["\"", "<character>"], "command": "set_register",
 		"context": [{"key": "setting.command_mode"}]
