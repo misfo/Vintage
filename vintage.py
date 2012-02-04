@@ -5,9 +5,6 @@ import os.path
 MOTION_MODE_NORMAL = 0
 # Used in visual line mode: Motions are extended to BOL and EOL.
 MOTION_MODE_LINE = 2
-# Used by some actions, just as 'd'. If a motion crosses line boundaries,
-# it'll be extended to BOL and EOL
-MOTION_MODE_AUTO_LINE = 1
 
 # Registers are used for clipboards and macro storage
 g_registers = {}
@@ -27,6 +24,7 @@ class InputState:
     motion_command = None
     motion_command_args = None
     motion_mode = MOTION_MODE_NORMAL
+    motion_mode_overridden = False
     motion_inclusive = False
     motion_clip_to_line = False
     register = None
@@ -81,6 +79,7 @@ def reset_input_state(view, reset_motion_mode = True):
     g_input_state.action_description = None
     g_input_state.motion_repeat_digits = []
     g_input_state.motion_command = None
+    g_input_state.motion_mode_overridden = False
     g_input_state.motion_command_args = None
     g_input_state.motion_inclusive = False
     g_input_state.motion_clip_to_line = False
@@ -93,8 +92,6 @@ def string_to_motion_mode(mode):
         return MOTION_MODE_NORMAL
     elif mode == 'line':
         return MOTION_MODE_LINE
-    elif mode == 'auto_line':
-        return MOTION_MODE_AUTO_LINE
     else:
         return -1
 
@@ -240,22 +237,11 @@ class SetAction(sublime_plugin.TextCommand):
 
         return self.run(**args)
 
-    def run(self, action, action_args = {}, motion_mode = None, description = None):
+    def run(self, action, action_args = {}, description = None):
         global g_input_state
         g_input_state.action_command = action
         g_input_state.action_command_args = action_args
         g_input_state.action_description = description
-
-        if motion_mode is not None:
-            m = string_to_motion_mode(motion_mode)
-            if m != -1:
-                if g_input_state.motion_mode == MOTION_MODE_LINE and m == MOTION_MODE_AUTO_LINE:
-                    # e.g., 'Vjd', MOTION_MODE_LINE should be maintained
-                    pass
-                else:
-                    set_motion_mode(self.view, m)
-            else:
-                print "invalid motion mode:", motion_mode
 
         if self.view.has_non_empty_selection_region():
             # Currently in visual mode, so no following motion is expected:
@@ -283,7 +269,7 @@ class SetMotion(sublime_plugin.TextCommand):
     def run_(self, args):
         return self.run(**args)
 
-    def run(self, motion, motion_args = {}, inclusive = False,
+    def run(self, motion, motion_args = {}, linewise = False, inclusive = False,
             clip_to_line = False, character = None, mode = None):
 
         global g_input_state
@@ -297,6 +283,10 @@ class SetMotion(sublime_plugin.TextCommand):
         g_input_state.motion_command_args = motion_args
         g_input_state.motion_inclusive = inclusive
         g_input_state.motion_clip_to_line = clip_to_line
+        if not g_input_state.motion_mode_overridden \
+                and g_input_state.action_command \
+                and linewise:
+            g_input_state.motion_mode = MOTION_MODE_LINE
 
         if mode is not None:
             m = string_to_motion_mode(mode)
@@ -343,6 +333,7 @@ class SetMotionMode(sublime_plugin.TextCommand):
 
         if m != -1:
             set_motion_mode(self.view, m)
+            g_input_state.motion_mode_overridden = True
         else:
             print "invalid motion mode"
 
@@ -455,31 +446,6 @@ def orient_single_character_region(view, forward, r):
 def set_single_character_selection_direction(view, forward):
     transform_selection_regions(view,
         lambda r: orient_single_character_region(view, forward, r))
-
-def expand_line_spanning_selections_to_line(view):
-    new_sel = []
-    for s in view.sel():
-        if s.a == s.b:
-            new_sel.append(s)
-            continue
-
-        la = view.full_line(s.a)
-        lb = view.full_line(s.b)
-
-        if la == lb:
-            new_sel.append(s)
-        elif s.a < s.b:
-            a = la.a
-            b = lb.b
-            new_sel.append(sublime.Region(a, b))
-        else:
-            a = la.b
-            b = lb.a
-            new_sel.append(sublime.Region(a, b))
-
-    view.sel().clear()
-    for s in new_sel:
-        view.sel().add(s)
 
 def clip_empty_selection_to_line_contents(view):
     new_sel = []
@@ -619,8 +585,6 @@ class ViEval(sublime_plugin.TextCommand):
 
             if motion_mode == MOTION_MODE_LINE:
                 expand_to_full_line(self.view)
-            elif motion_mode == MOTION_MODE_AUTO_LINE:
-                expand_line_spanning_selections_to_line(self.view)
 
             if action_command:
                 # Apply the action to the selection
