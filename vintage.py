@@ -394,7 +394,7 @@ def transform_selection_regions(view, f):
     for r in new_sel:
         sel.add(r)
 
-def expand_to_full_line(view):
+def expand_to_full_line(view, ignore_trailing_newline = True):
     new_sel = []
     for s in view.sel():
         if s.a == s.b:
@@ -405,7 +405,7 @@ def expand_to_full_line(view):
 
             a = la.a
 
-            if s.end() == lb.a:
+            if ignore_trailing_newline and s.end() == lb.a:
                 # s.end() is already at EOL, don't go down to the next line
                 b = s.end()
             else:
@@ -584,7 +584,7 @@ class ViEval(sublime_plugin.TextCommand):
                 transform_selection_regions(self.view, lambda r: self.view.split_by_newlines(r)[0])
 
             if motion_mode == MOTION_MODE_LINE:
-                expand_to_full_line(self.view)
+                expand_to_full_line(self.view, visual_mode)
 
             if action_command:
                 # Apply the action to the selection
