@@ -585,6 +585,9 @@ class ViEval(sublime_plugin.TextCommand):
 
             if motion_mode == MOTION_MODE_LINE:
                 expand_to_full_line(self.view, visual_mode)
+                if action_command == "enter_insert_mode":
+                    transform_selection_regions(self.view,
+                        lambda r: sublime.Region(r.begin(), r.end() - 1))
 
             if action_command:
                 # Apply the action to the selection
