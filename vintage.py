@@ -586,6 +586,9 @@ class ViEval(sublime_plugin.TextCommand):
             if motion_mode == MOTION_MODE_LINE:
                 expand_to_full_line(self.view, visual_mode)
                 if action_command == "enter_insert_mode":
+                    # When lines are deleted before entering insert mode, the
+                    # cursor should be left on an empty line. Leave the trailing
+                    # newline out of the selection to allow for this.
                     transform_selection_regions(self.view,
                         lambda r: sublime.Region(r.begin(), r.end() - 1))
 
