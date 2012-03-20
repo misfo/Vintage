@@ -41,26 +41,26 @@ class ViMoveToHardEol(sublime_plugin.TextCommand):
         transform_selection(self.view, lambda pt: self.view.line(pt).b,
             extend=extend, clip_to_line=False)
 
+def first_non_whitespace_on_line(view, pt):
+    l = view.line(pt)
+    lstr = view.substr(l)
+
+    offset = 0
+    for c in lstr:
+        if c == ' ' or c == '\t':
+            offset += 1
+        else:
+            break
+
+    return l.a + offset
+
 class ViMoveToFirstNonWhiteSpaceCharacter(sublime_plugin.TextCommand):
-    def first_character(self, pt):
-        l = self.view.line(pt)
-        lstr = self.view.substr(l)
-
-        offset = 0
-        for c in lstr:
-            if c == ' ' or c == '\t':
-                offset += 1
-            else:
-                break
-
-        return l.a + offset
-
     def run(self, edit, repeat = 1, extend = False, register = '"'):
         # According to Vim's help, _ moves count - 1 lines downward.
         for i in xrange(repeat - 1):
             self.view.run_command('move', {'by': 'lines', 'forward': True, 'extend': extend})
 
-        transform_selection(self.view, lambda pt: self.first_character(pt),
+        transform_selection(self.view, lambda pt: first_non_whitespace_on_line(self.view, pt),
             extend=extend)
 
 
@@ -174,13 +174,20 @@ class MoveCaretHalfPage(sublime_plugin.TextCommand):
 
         half_page = page / 2
 
-        current_sel = self.view.sel()[0]
-        current_position = current_sel.b
-        row, col = self.view.rowcol(current_position)
-        target_point = self.view.text_point(row + half_page, col)
+        visual_mode = self.view.has_non_empty_selection_region()
 
-        transform_selection(self.view, lambda pt: target_point, extend=extend)
-        self.view.show(target_point)
+        def transform(r):
+            row, col = self.view.rowcol(r.b)
+            line_pt = self.view.text_point(row + half_page, 0)
+            b = first_non_whitespace_on_line(self.view, line_pt)
+            if not visual_mode:
+                return sublime.Region(b)
+            elif r.a > b:
+                return sublime.Region(r.a, b)
+            else:
+                return sublime.Region(r.a, b + 1)
+
+        transform_selection_regions(self.view, transform)
 
 class MoveCaretToScreenCenter(sublime_plugin.TextCommand):
     def run(self, edit, extend = True):
