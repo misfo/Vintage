@@ -541,8 +541,15 @@ class ViEval(sublime_plugin.TextCommand):
             motion_repeat *= prefix_repeat
             prefix_repeat = 1
 
-        # Check if the motion command would like to handle the repeat itself
-        if motion_args and 'repeat' in motion_args:
+        visual_mode = self.view.has_non_empty_selection_region()
+
+        # Check if the action or motion command would like to handle the repeat
+        # themselves.
+        if visual_mode and action_args and 'repeat' in action_args:
+            action_args['repeat'] = motion_repeat * prefix_repeat
+            motion_repeat = 1
+            prefix_repeat = 1
+        elif motion_args and 'repeat' in motion_args:
             motion_args['repeat'] = motion_repeat * prefix_repeat
             motion_repeat = 1
             prefix_repeat = 1
@@ -552,8 +559,6 @@ class ViEval(sublime_plugin.TextCommand):
         # know if a repeat was specified.
         if motion_args and 'explicit_repeat' in motion_args:
             motion_args['explicit_repeat'] = explicit_repeat
-
-        visual_mode = self.view.has_non_empty_selection_region()
 
         # Let the motion know if we're in visual mode, if it wants to know
         if motion_args and 'visual' in motion_args:
@@ -1006,13 +1011,15 @@ class ViScrollLines(ViPrefixableCommand):
 
 
 class ViIndent(sublime_plugin.TextCommand):
-    def run(self, edit):
-        self.view.run_command('indent')
+    def run(self, edit, repeat=1):
+        for n in xrange(repeat):
+            self.view.run_command('indent')
         transform_selection_regions(self.view, shrink_to_first_char)
 
 class ViUnindent(sublime_plugin.TextCommand):
-    def run(self, edit):
-        self.view.run_command('unindent')
+    def run(self, edit, repeat=1):
+        for n in xrange(repeat):
+            self.view.run_command('unindent')
         transform_selection_regions(self.view, shrink_to_first_char)
 
 class ViSetBookmark(sublime_plugin.TextCommand):

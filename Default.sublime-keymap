@@ -421,11 +421,11 @@
 		"context": [{"key": "setting.command_mode"}]
 	},
 
-	{ "keys": [">"], "command": "set_action", "args": {"action": "vi_indent", "description": "Indent"},
+	{ "keys": [">"], "command": "set_action", "args": {"action": "vi_indent", "description": "Indent", "action_args": {"repeat": 1}},
 		"context": [{"key": "setting.command_mode"}]
 	},
 
-	{ "keys": ["<"], "command": "set_action", "args": {"action": "vi_unindent", "description": "Unindent"},
+	{ "keys": ["<"], "command": "set_action", "args": {"action": "vi_unindent", "description": "Unindent", "action_args": {"repeat": 1}},
 		"context": [{"key": "setting.command_mode"}]
 	},
 
