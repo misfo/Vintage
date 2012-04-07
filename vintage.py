@@ -901,8 +901,15 @@ class PasteFromRegisterCommand(sublime_plugin.TextCommand):
         for s in regions:
             s = sublime.Region(s.a + offset, s.b + offset)
 
-            if len(text) > 0 and text[-1] == '\n':
-                # paste line-wise
+            if text.endswith('\n'):
+                # Paste line-wise.
+
+                # If we are at the end of the buffer, add a new line as
+                # Vim does.
+                if (self.view.rowcol(s.end())[0] ==
+                    self.view.rowcol(self.view.size())[0]):
+                        text = '\n' + text[:-1]
+
                 if forward:
                     start = self.view.full_line(s.end()).b
                 else:
